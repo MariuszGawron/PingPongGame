@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ping Pong</title>
+    <style>
+      #canvas {
+        border: 2px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" width="800" height="600"></canvas>
+
+    <script>
+      // Inicjalizacja canvas i kontekstu
+      var canvas = document.getElementById("canvas");
+      var context = canvas.getContext("2d");
+
+      // Definiowanie paletki i piłki
+      var player1 = {
+        x: 20,
+        y: canvas.height / 2 - 40,
+        w: 10,
+        h: 80,
+        color: "blue",
+      };
+      var player2 = {
+        x: canvas.width - 30,
+        y: canvas.height / 2 - 40,
+        w: 10,
+        h: 80,
+        color: "red",
+      };
+      var ball = {
+        x: canvas.width / 2,
+        y: canvas.height / 2,
+        r: 10,
+        color: "green",
+        dx: 5,
+        dy: 5,
+      };
+
+      // Definiowanie wyniku
+      var score1 = 0;
+      var score2 = 0;
+
+      // Definiowanie parametrów gry
+      var fps = 600;
+
+      // Funkcja rysująca paletki
+      function drawPaddles() {
+        context.fillStyle = player1.color;
+        context.fillRect(player1.x, player1.y, player1.w, player1.h);
+        context.fillStyle = player2.color;
+        context.fillRect(player2.x, player2.y, player2.w, player2.h);
+      }
+
+      // Funkcja rysująca piłkę
+      function drawBall() {
+        context.beginPath();
+        context.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2, false);
+        context.fillStyle = ball.color;
+        context.fill();
+      }
+
+      // Funkcja rysująca wynik
+      function drawScore() {
+        context.font = "20px Arial";
+        context.fillText("Player 1: " + score1, 50, 50);
+        context.fillText("Player 2: " + score2, canvas.width - 150, 50);
+      }
+
+      // Funkcja ruchu piłki
+      function moveBall() {
+        // Kolizja z paletką gracza 1
+        if (
+          ball.x - ball.r < player1.x + player1.w &&
+          ball.y + ball.r > player1.y &&
+          ball.y - ball.r < player1.y + player1.h
+        ) {
+          ball.dx = -ball.dx;
+        }
+
+        // Kolizja z paletką gracza 2
+        if (
+          ball.x + ball.r > player2.x &&
+          ball.y + ball.r > player2.y &&
+          ball.y - ball.r < player2.y + player2.h
+        ) {
+          ball.dx = -ball.dx;
+        }
+
+        // Wyjście piłki poza pole gry z lewej lub prawej strony
+        if (ball.x + ball.r > canvas.width) {
+          score1++;
+          resetBall();
+        } else if (ball.x - ball.r < 0) {
+          score2++;
+          resetBall();
+        }
+        // Wyjście piłki poza pole gry z góry lub dołu
+        if (ball.y + ball.r > canvas.height || ball.y - ball.r < 0) {
+          ball.dy = -ball.dy;
+        }
+
+        // Ruch piłki
+        ball.x += ball.dx;
+        ball.y += ball.dy;
+      }
+
+      // Funkcja resetująca piłkę
+      function resetBall() {
+        ball.x = canvas.width / 2;
+        ball.y = canvas.height / 2;
+        ball.dx = -ball.dx;
+      }
+
+      // Funkcja ruchu paletki gracza 1
+      function movePaddle1(e) {
+        // Góra
+        if (e.keyCode == 87) {
+          if (player1.y > 0) {
+            player1.y -= 10;
+          }
+        }
+
+        // Dół
+        if (e.keyCode == 83) {
+          if (player1.y + player1.h < canvas.height) {
+            player1.y += 10;
+          }
+        }
+      }
+
+      // Funkcja ruchu paletki gracza 2
+      function movePaddle2(e) {
+        // Góra
+        if (e.keyCode == 38) {
+          if (player2.y > 0) {
+            player2.y -= 10;
+          }
+        }
+
+        // Dół
+        if (e.keyCode == 40) {
+          if (player2.y + player2.h < canvas.height) {
+            player2.y += 10;
+          }
+        }
+      }
+
+      // Funkcja główna
+      function main() {
+        // Czyszczenie canvas
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Rysowanie paletki i piłki
+        drawPaddles();
+        drawBall();
+
+        // Rysowanie wyniku
+        drawScore();
+
+        // Ruch piłki
+        moveBall();
+
+        // Nasłuchiwanie klawiszy paletki gracza 1
+        window.addEventListener("keydown", movePaddle1);
+
+        // Nasłuchiwanie klawiszy paletki gracza 2
+        window.addEventListener("keydown", movePaddle2);
+
+        // Wywołanie funkcji głównej z częstotliwością fps
+        setTimeout(function () {
+          requestAnimationFrame(main);
+        }, 1000 / fps);
+      }
+
+      // Wywołanie funkcji głównej
+      main();
+    </script>
+  </body>
+</html>
